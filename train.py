@@ -47,7 +47,7 @@ if __name__ == '__main__':
 
     # Agent
     agent = DQNAgent(actions=env.action_space.n,
-                     max_memory=100000,
+                     max_memory=60000,
                      device=device,
                      save_dir=args.save_dir,
                      continue_training=args.continue_training,
@@ -101,12 +101,17 @@ if __name__ == '__main__':
         rewards.append(total_reward / t)
 
         if e % args.log_interval == 0:
+            if device == 'cuda':
+                max_memory = torch.cuda.max_memory_allocated(device) / 1e6
+                print("Max memory on {}: {} MB\n".format(
+                    device, int(max_memory)))
             time_elapsed = time() - t_start
             print('Episode {e} - '
                   'Frame (step) {f} - '
                   'Frames/sec {fs} - '
                   'Epsilon {eps} - '
                   'Mean Reward {r:.5f} - '
+                  'Time elapsed {te} - '
                   'Time elapsed {te} - '
                   'Time left {tl}'.format(
                       e=e,

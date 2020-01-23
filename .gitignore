@@ -5,6 +5,5 @@
 **/__pycache__/
 .DS_Store
 .gitignore
-.empty
 tester.py
 /._*
