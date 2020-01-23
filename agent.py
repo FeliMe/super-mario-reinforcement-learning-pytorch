@@ -1,3 +1,8 @@
+"""
+Some parts are from:
+https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html
+"""
+
 import copy
 import math
 import os
@@ -17,7 +22,8 @@ Transition = namedtuple('Transition',
 class DQNAgent:
     """ DQN agent """
 
-    def __init__(self, actions, max_memory, device, save_dir='models/'):
+    def __init__(self, actions, max_memory, device, save_dir='models/',
+                 continue_training=False, model_path=None):
         self.actions = actions
         self.batch_size = 128
         self.gamma = 0.9
@@ -29,13 +35,19 @@ class DQNAgent:
         self.device = device
         self.step = 0
         self.n_update_target = 10000
-        self.save_each = 50000
+        self.save_each = 100000
         self.learn_each = 3
         self.learn_step = 0
         self.burnin = 100000
 
         self.policy_net = dqn(actions).to(device)
         self.target_net = dqn(actions).to(device)
+
+        if continue_training:
+            self.step = int(model_path.split('/')[1].split('.')[0].split('model')[1])
+            print(f"Continuing from step {self.step}")
+            self.policy_net.load_state_dict(torch.load(model_path))
+
         self.target_net.load_state_dict(self.policy_net.state_dict())
         self.target_net.eval()
 

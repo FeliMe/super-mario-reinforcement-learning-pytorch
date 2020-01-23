@@ -17,9 +17,14 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('-n', '--num_episodes', type=int, default=10000)
     parser.add_argument('-s', '--save_dir', type=str, default='models/')
+    parser.add_argument('-c', '--continue_training', action='store_true')
+    parser.add_argument('-p', '--model_path', type=str, default=None)
     parser.add_argument('--log_interval', type=int, default=100)
     parser.add_argument('--render', type=bool, default=False)
     args = parser.parse_args()
+
+    if args.continue_training:
+        assert args.model_path is not None
 
     # Build env (first level, right only)
     env = gym_super_mario_bros.make('SuperMarioBros-1-1-v0')
@@ -33,7 +38,9 @@ if __name__ == '__main__':
     agent = DQNAgent(actions=env.action_space.n,
                      max_memory=100000,
                      device=device,
-                     save_dir=args.save_dir)
+                     save_dir=args.save_dir,
+                     continue_training=args.continue_training,
+                     model_path=args.model_path)
 
     # Timing
     start = time()
