@@ -1,4 +1,4 @@
-# Reinforcement Learning on Super Mario Bros (NES)
+# Reinforcement Learning on Super Mario Bros (NES) PyTorch
 
 Mostly taken from [https://github.com/sebastianheinz/super-mario-reinforcement-learning](https://github.com/sebastianheinz/super-mario-reinforcement-learning)
 and [https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html](https://pytorch.org/tutorials/intermediate/reinforcement_q_learning.html).

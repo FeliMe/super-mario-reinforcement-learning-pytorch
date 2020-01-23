@@ -22,16 +22,17 @@ class DQNAgent:
     """ DQN agent """
 
     def __init__(self, actions, max_memory, device, save_dir='models/',
-                 continue_training=False, model_path=None):
+                 continue_training=False, model_path=None, double_q=True):
         self.actions = actions
-        self.batch_size = 128
+        self.save_dir = save_dir
+        self.device = device
+        self.double_q = double_q
+        self.batch_size = 32
         self.gamma = 0.9
         self.eps = 1
         self.eps_decay = 0.99999975
         self.eps_min = 0.1
         self.target_update = 10
-        self.save_dir = save_dir
-        self.device = device
         self.step = 0
         self.n_update_target = 10000
         self.save_each = 100000
@@ -114,7 +115,7 @@ class DQNAgent:
         # Compute a mask of non-final states and concatenate the batch elements
         # (a final state would've been the one after which simulation ended)
         non_final_mask = torch.tensor(tuple(map(lambda s: s is not None,
-                                                batch.next_state)), device=self.device, dtype=torch.uint8)
+                                                batch.next_state)), device=self.device, dtype=torch.bool)
         non_final_next_states = torch.cat([s for s in batch.next_state
                                           if s is not None])
         state_batch = torch.cat(batch.state)
@@ -132,9 +133,21 @@ class DQNAgent:
         # based on the "older" target_net; selecting their best reward with
         # max(1)[0]. This is merged based on the mask, such that we'll have
         # either the expected state value or 0 in case the state was final.
+        next_q = self.target_net(non_final_next_states).detach()
+        if self.double_q:
+            a = self.policy_net(
+                non_final_next_states).max(1)[1].detach()
+            next_q_unmasked = next_q[torch.arange(0, self.batch_size), a]
+        else:
+            next_q_unmasked = next_q.max(1)[0]
+
         next_state_values = torch.zeros(self.batch_size, device=self.device)
-        next_state_values[non_final_mask] = self.target_net(
-            non_final_next_states).max(1)[0].detach()
+        next_state_values[non_final_mask] = next_q_unmasked
+
+        # next_state_values = torch.zeros(self.batch_size, device=self.device)
+        # next_state_values[non_final_mask] = self.target_net(
+        #     non_final_next_states).max(1)[0].detach()
+
         # Compute the expected Q values
         expected_state_action_values = (next_state_values * self.gamma) + reward_batch
 

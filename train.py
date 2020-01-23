@@ -11,6 +11,17 @@ from time import time
 from wrappers import wrapper
 
 
+def time_to_str(t):
+    return "{:.0f}h {:.0f}m {:.0f}s".format(t // 3600, (t // 60) % 60, t % 60)
+
+
+def time_left(t_start, n_iters, i_iter):
+    iters_left = n_iters - i_iter
+    time_per_iter = (time() - t_start) / i_iter
+    time_remaining = time_per_iter * iters_left
+    return time_to_str(time_remaining)
+
+
 if __name__ == '__main__':
 
     # Parse args
@@ -40,10 +51,11 @@ if __name__ == '__main__':
                      device=device,
                      save_dir=args.save_dir,
                      continue_training=args.continue_training,
-                     model_path=args.model_path)
+                     model_path=args.model_path,
+                     double_q=True)
 
     # Timing
-    start = time()
+    t_start = time()
     step = 0
 
     rewards = []
@@ -89,16 +101,21 @@ if __name__ == '__main__':
         rewards.append(total_reward / t)
 
         if e % args.log_interval == 0:
+            time_elapsed = time() - t_start
             print('Episode {e} - '
                   'Frame (step) {f} - '
                   'Frames/sec {fs} - '
                   'Epsilon {eps} - '
-                  'Mean Reward {r}'.format(
+                  'Mean Reward {r:.5f} - '
+                  'Time elapsed {te} - '
+                  'Time left {tl}'.format(
                       e=e,
                       f=agent.step,
-                      fs=np.round((agent.step - step) / (time() - start)),
+                      fs=np.round((agent.step - step) / (time() - t_start)),
                       eps=np.round(agent.eps, 4),
-                      r=np.mean(rewards[-100:])))
+                      r=np.mean(rewards[-100:]),
+                      te=time_to_str(time_elapsed),
+                      tl=time_left(t_start, args.num_episodes, e + 1)))
 
     print("Done")
     agent.save_model()
