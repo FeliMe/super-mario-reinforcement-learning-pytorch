@@ -1,7 +1,7 @@
 /models/*
 /.vscode/
 /__pycache__/
-\.idea/
+/.idea/
 **/__pycache__/
 .DS_Store
 .gitignore
