@@ -51,8 +51,8 @@ class DQNAgent:
 
         self.memory = ReplayMemory(max_memory)
 
-        self.opt = torch.optim.RMSprop(
-            self.policy_net.parameters(), lr=0.0001, alpha=0.95, eps=0.01)
+        self.opt = torch.optim.Adam(
+            self.policy_net.parameters(), lr=0.00025)
 
         self.state_dict = copy.deepcopy(self.policy_net.state_dict())
 
@@ -138,8 +138,8 @@ class DQNAgent:
         loss.backward()
 
         # Clip the gradients to lie between -1 and +1
-        # for params in self.policy_net.parameters():
-        #     params.grad.data.clamp_(-1, 1)
+        for params in self.policy_net.parameters():
+            params.grad.data.clamp_(-1, 1)
 
         self.opt.step()
 
