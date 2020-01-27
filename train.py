@@ -47,12 +47,12 @@ if __name__ == '__main__':
 
     # Agent
     agent = DQNAgent(actions=env.action_space.n,
-                     max_memory=60000,
+                     max_memory=70000,
                      device=device,
                      save_dir=args.save_dir,
                      continue_training=args.continue_training,
                      model_path=args.model_path,
-                     double_q=True)
+                     double_q=False)
 
     # Timing
     t_start = time()
@@ -82,9 +82,10 @@ if __name__ == '__main__':
             next_state, reward, done, info = env.step(action=action.item())
             next_state = convert_state_to_tensor(next_state).to(device)
             reward = torch.tensor([reward], device=device)
+            done = torch.tensor([done], device=device)
 
             # Store the transition in memory
-            agent.memory.push(state, action, next_state, reward)
+            agent.memory.push(state, action, next_state, reward, done)
 
             # Move to the next state
             state = next_state
@@ -94,7 +95,7 @@ if __name__ == '__main__':
 
             # Total reward
             total_reward += reward.item()
-            if done:
+            if done or info['flag_get']:
                 break
 
         # Rewards
@@ -111,7 +112,6 @@ if __name__ == '__main__':
                   'Frames/sec {fs} - '
                   'Epsilon {eps} - '
                   'Mean Reward {r:.5f} - '
-                  'Time elapsed {te} - '
                   'Time elapsed {te} - '
                   'Time left {tl}'.format(
                       e=e,

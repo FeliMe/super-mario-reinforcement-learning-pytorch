@@ -41,6 +41,7 @@ if __name__ == '__main__':
 
             # Select action
             action = agent.policy_net(state).max(1)[1].view(1, 1)
+            print(f"Time step {t}, action taken {RIGHT_ONLY[action.item()]}")
 
             # Perform action
             next_state, reward, done, info = env.step(action=action.item())
